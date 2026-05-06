@@ -1,0 +1,150 @@
+generator client {
+    provider     = "prisma-client"
+    output       = "./client"
+    moduleFormat = "cjs"
+}
+
+datasource db {
+    provider = "postgresql"
+}
+
+model User {
+    id         String  @id @default(uuid())
+    email      String  @unique
+    password   String
+    isVerified Boolean @default(false) @map("is_verified")
+    isActive   Boolean @default(true) @map("is_active")
+
+    createdAt DateTime  @default(now()) @map("created_at")
+    updatedAt DateTime  @updatedAt @map("updated_at")
+    deletedAt DateTime? @map("deleted_at")
+
+    sessions           Session[]
+    emailVerifications EmailVerification[]
+    passwordResets     PasswordReset[]
+    roles              UserRole[]
+    authLogs           AuthLog[]
+
+    @@map("users")
+}
+
+model Session {
+    id               String @id @default(uuid())
+    userId           String @map("user_id")
+    refreshTokenHash String @map("refresh_token_hash")
+
+    userAgent String? @map("user_agent")
+    ipAddress String? @map("ip_address")
+
+    expiresAt DateTime  @map("expires_at")
+    revokedAt DateTime? @map("revoked_at")
+
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    user User @relation(fields: [userId], references: [id])
+
+    @@map("sessions")
+}
+
+model EmailVerification {
+    id        String    @id @default(uuid())
+    userId    String    @map("user_id")
+    token     String
+    expiresAt DateTime  @map("expires_at")
+    usedAt    DateTime? @map("used_at")
+
+    createdAt DateTime @default(now()) @map("created_at")
+
+    user User @relation(fields: [userId], references: [id])
+
+    @@map("email_verifications")
+}
+
+model PasswordReset {
+    id        String    @id @default(uuid())
+    userId    String    @map("user_id")
+    token     String
+    expiresAt DateTime  @map("expires_at")
+    usedAt    DateTime? @map("used_at")
+
+    createdAt DateTime @default(now()) @map("created_at")
+
+    user User @relation(fields: [userId], references: [id])
+
+    @@map("password_resets")
+}
+
+model Role {
+    id          String  @id @default(uuid())
+    name        String  @unique
+    description String?
+
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    users       UserRole[]
+    permissions RolePermission[]
+
+    @@map("roles")
+}
+
+model UserRole {
+    userId    String   @map("user_id")
+    roleId    String   @map("role_id")
+    createdAt DateTime @default(now()) @map("created_at")
+
+    user User @relation(fields: [userId], references: [id])
+    role Role @relation(fields: [roleId], references: [id])
+
+    @@id([userId, roleId])
+    @@map("user_roles")
+}
+
+model Permission {
+    id          String  @id @default(uuid())
+    name        String  @unique
+    description String?
+
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    roles RolePermission[]
+
+    @@map("permissions")
+}
+
+model RolePermission {
+    roleId       String   @map("role_id")
+    permissionId String   @map("permission_id")
+    createdAt    DateTime @default(now()) @map("created_at")
+
+    role       Role       @relation(fields: [roleId], references: [id])
+    permission Permission @relation(fields: [permissionId], references: [id])
+
+    @@id([roleId, permissionId])
+    @@map("role_permissions")
+}
+
+model AuthLog {
+    id     String     @id @default(uuid())
+    userId String?    @map("user_id")
+    action AuthAction
+
+    ipAddress String? @map("ip_address")
+    userAgent String? @map("user_agent")
+
+    createdAt DateTime @default(now()) @map("created_at")
+
+    user User? @relation(fields: [userId], references: [id])
+
+    @@map("auth_logs")
+}
+
+enum AuthAction {
+    LOGIN_SUCCESS
+    LOGIN_FAILED
+    LOGOUT
+    REFRESH_TOKEN
+    PASSWORD_RESET_REQUEST
+}
