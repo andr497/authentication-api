@@ -1,6 +1,6 @@
 generator client {
     provider     = "prisma-client"
-    output       = "./client"
+    output       = "../generated/client"
     moduleFormat = "cjs"
 }
 
@@ -44,13 +44,14 @@ model Session {
 
     user User @relation(fields: [userId], references: [id])
 
+    @@index([userId, revokedAt])
     @@map("sessions")
 }
 
 model EmailVerification {
     id        String    @id @default(uuid())
     userId    String    @map("user_id")
-    token     String
+    tokenHash String    @map("token_hash")
     expiresAt DateTime  @map("expires_at")
     usedAt    DateTime? @map("used_at")
 
@@ -58,6 +59,7 @@ model EmailVerification {
 
     user User @relation(fields: [userId], references: [id])
 
+    @@index([userId])
     @@map("email_verifications")
 }
 
@@ -72,6 +74,7 @@ model PasswordReset {
 
     user User @relation(fields: [userId], references: [id])
 
+    @@index([userId])
     @@map("password_resets")
 }
 
@@ -138,6 +141,7 @@ model AuthLog {
 
     user User? @relation(fields: [userId], references: [id])
 
+    @@index([userId])
     @@map("auth_logs")
 }
 
@@ -147,4 +151,5 @@ enum AuthAction {
     LOGOUT
     REFRESH_TOKEN
     PASSWORD_RESET_REQUEST
+    PASSWORD_RESET_SUCCESS
 }
