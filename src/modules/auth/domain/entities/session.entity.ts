@@ -16,6 +16,7 @@ export class Session {
         userAgent?: string | null;
         ipAddress?: string | null;
         expiresAt: Date;
+        revokedAt?: Date | null;
     }): Session {
         return new Session(
             params.id,
@@ -24,6 +25,7 @@ export class Session {
             params.userAgent ?? null,
             params.ipAddress ?? null,
             params.expiresAt,
+            params.revokedAt ?? null,
         );
     }
 

@@ -18,3 +18,9 @@ export class UserAlreadyExistsError extends DomainError {
         super(AuthErrorCode.USER_ALREADY_EXISTS, 409, message);
     }
 }
+
+export class InvalidCredentialsError extends DomainError {
+    constructor(message: string = 'Invalid credentials') {
+        super(AuthErrorCode.INVALID_CREDENTIALS, 401, message);
+    }
+}
