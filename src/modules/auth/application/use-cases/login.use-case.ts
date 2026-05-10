@@ -11,6 +11,7 @@ import { TokenService } from '@modules/auth/application/contracts/token-service.
 import { InvalidCredentialsError } from '@modules/auth/domain/errors/auth-exceptions.error';
 import { LoginDto } from '../dto/login.dto';
 import { RequestMetadataDto } from '../dto/request-metadata.dto';
+import { RefreshTokenPayload } from '../types/refresh-token-payload.type';
 
 @Injectable()
 export class LoginUseCase {
@@ -39,10 +40,12 @@ export class LoginUseCase {
 
         const sessionId = randomUUID();
 
-        const refreshToken = await this.tokenService.generateRefreshToken(
-            user.id,
+        const payload = {
+            sub: user.id,
             sessionId,
-        );
+        };
+        const refreshToken =
+            await this.tokenService.generateRefreshToken(payload);
 
         const refreshTokenHash = await this.hashService.hash(refreshToken);
 
@@ -59,9 +62,8 @@ export class LoginUseCase {
 
         await this.sessionRepository.save(session);
 
-        const accessToken = await this.tokenService.generateAccessToken(
-            user.id,
-        );
+        const accessToken =
+            await this.tokenService.generateAccessToken(payload);
 
         return {
             accessToken,

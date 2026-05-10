@@ -1,13 +1,12 @@
+import { AccessTokenPayload } from '../types/access-token-payload.type';
+import { RefreshTokenPayload } from '../types/refresh-token-payload.type';
+
 export abstract class TokenService {
-    abstract generateAccessToken(userId: string): Promise<string>;
+    abstract generateAccessToken(payload: AccessTokenPayload): Promise<string>;
 
     abstract generateRefreshToken(
-        userId: string,
-        sessionId: string,
+        payload: RefreshTokenPayload,
     ): Promise<string>;
 
-    abstract verifyRefreshToken(token: string): Promise<{
-        sub: string;
-        sessionId: string;
-    }>;
+    abstract verifyRefreshToken(token: string): Promise<RefreshTokenPayload>;
 }

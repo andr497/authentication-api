@@ -13,6 +13,7 @@ import { JwtTokenService } from './infrastructure/services/jwt-token.service';
 import { JwtModule } from '@nestjs/jwt';
 import { RefreshTokenUseCase } from './application/use-cases/refresh-token.use-case';
 import { ConfigService } from '@nestjs/config';
+import { JwtStrategy } from './infrastructure/strategies/jwt.strategy';
 
 @Module({
     imports: [
@@ -29,6 +30,7 @@ import { ConfigService } from '@nestjs/config';
         LoginUseCase,
         RefreshTokenUseCase,
         HashService,
+        JwtStrategy,
         {
             provide: UserRepository,
             useClass: PrismaUserRepository,

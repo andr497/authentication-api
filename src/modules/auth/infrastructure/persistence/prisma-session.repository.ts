@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { SessionRepository } from '../../domain/repositories/session.repository';
+import { Session } from '@modules/auth/domain/entities/session.entity';
 import { PrismaService } from '@src/infrastructure/database/prisma/prisma.service';
-import { Session } from '../../domain/entities/session.entity';
+import { SessionRepository } from '@modules/auth/domain/repositories/session.repository';
 
 @Injectable()
 export class PrismaSessionRepository extends SessionRepository {
@@ -10,7 +10,7 @@ export class PrismaSessionRepository extends SessionRepository {
     }
 
     async save(session: Session): Promise<Session> {
-        await this.prisma.session.create({
+        const created = await this.prisma.session.create({
             data: {
                 id: session.id,
                 userId: session.userId,
@@ -24,7 +24,15 @@ export class PrismaSessionRepository extends SessionRepository {
             },
         });
 
-        return session;
+        return Session.create({
+            id: created.id,
+            userId: created.userId,
+            refreshTokenHash: created.refreshTokenHash,
+            userAgent: created.userAgent,
+            ipAddress: created.ipAddress,
+            expiresAt: created.expiresAt,
+            revokedAt: created.revokedAt,
+        });
     }
 
     async findById(id: string): Promise<Session | null> {

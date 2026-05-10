@@ -1,13 +1,15 @@
-import { Injectable } from '@nestjs/common';
-import { RefreshTokenDto } from '../dto/refresh-token.dto';
-import { SessionRepository } from '../../domain/repositories/session.repository';
-import { TokenService } from '../contracts/token-service.contract';
-import { HashService } from './../../infrastructure/services/hash.service';
-import { InvalidCredentialsError } from '../../domain/errors/auth-exceptions.error';
 import { randomUUID } from 'crypto';
-import { Session } from '../../domain/entities/session.entity';
-import { authConfig } from '../../infrastructure/config/auth.config';
+
+import { Injectable } from '@nestjs/common';
 import { addTime } from '@src/shared/utils/date/add-time';
+import { Session } from '@modules/auth/domain/entities/session.entity';
+import { authConfig } from '@modules/auth/infrastructure/config/auth.config';
+import { HashService } from '@modules/auth/infrastructure/services/hash.service';
+import { SessionRepository } from '@modules/auth/domain/repositories/session.repository';
+import { TokenService } from '@modules/auth/application/contracts/token-service.contract';
+import { InvalidCredentialsError } from '@modules/auth/domain/errors/auth-exceptions.error';
+
+import { RefreshTokenDto } from '../dto/refresh-token.dto';
 import { RequestMetadataDto } from '../dto/request-metadata.dto';
 
 @Injectable()
@@ -52,10 +54,12 @@ export class RefreshTokenUseCase {
 
         const newSessionId = randomUUID();
 
-        const refreshToken = await this.tokenService.generateRefreshToken(
-            payload.sub,
-            newSessionId,
-        );
+        const newPayload = {
+            sub: payload.sub,
+            sessionId: newSessionId,
+        };
+        const refreshToken =
+            await this.tokenService.generateRefreshToken(newPayload);
 
         const refreshTokenHash = await this.hashService.hash(refreshToken);
 
@@ -72,9 +76,8 @@ export class RefreshTokenUseCase {
 
         await this.sessionRepository.save(newSession);
 
-        const accessToken = await this.tokenService.generateAccessToken(
-            payload.sub,
-        );
+        const accessToken =
+            await this.tokenService.generateAccessToken(newPayload);
 
         return {
             accessToken,
