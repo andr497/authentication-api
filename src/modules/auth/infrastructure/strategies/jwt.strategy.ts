@@ -18,7 +18,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         super({
             jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
             ignoreExpiration: false,
-            secretOrKey: configService.get<string>('JWT_SECRET') as string,
+            secretOrKey: configService.get<string>(
+                'JWT_ACCESS_SECRET',
+            ) as string,
         });
     }
 
@@ -26,26 +28,26 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         const user = await this.userRepository.findById(payload.sub);
 
         if (!user) {
-            throw new UnauthorizedException();
+            throw new UnauthorizedException('UNAUTHORIZED_USER_NOT_FOUND');
         }
 
         if (!user.isActive) {
-            throw new UnauthorizedException('User is inactive');
+            throw new UnauthorizedException('UNAUTHORIZED_USER_INACTIVE');
         }
         const session = await this.sessionRepository.findById(
             payload.sessionId,
         );
 
         if (!session) {
-            throw new UnauthorizedException();
+            throw new UnauthorizedException('UNAUTHORIZED_SESSION_NOT_FOUND');
         }
 
         if (session.revokedAt) {
-            throw new UnauthorizedException();
+            throw new UnauthorizedException('UNAUTHORIZED_SESSION_REVOKED');
         }
 
         if (session.expiresAt.getTime() < Date.now()) {
-            throw new UnauthorizedException();
+            throw new UnauthorizedException('UNAUTHORIZED_SESSION_EXPIRED');
         }
 
         return payload;

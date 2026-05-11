@@ -1,29 +1,24 @@
 import { Module } from '@nestjs/common';
+import { JwtModule } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 
 import { HashService } from './infrastructure/services/hash.service';
-import { UserRepository } from './domain/repositories/user.repository';
-import { RegisterUseCase } from './application/use-cases/register.use-case';
-import { AuthController } from './presentation/http/controllers/auth.controller';
-import { PrismaUserRepository } from './infrastructure/persistence/prisma-user.repository';
 import { LoginUseCase } from './application/use-cases/login.use-case';
-import { SessionRepository } from './domain/repositories/session.repository';
-import { PrismaSessionRepository } from './infrastructure/persistence/prisma-session.repository';
-import { TokenService } from './application/contracts/token-service.contract';
-import { JwtTokenService } from './infrastructure/services/jwt-token.service';
-import { JwtModule } from '@nestjs/jwt';
-import { RefreshTokenUseCase } from './application/use-cases/refresh-token.use-case';
-import { ConfigService } from '@nestjs/config';
+import { UserRepository } from './domain/repositories/user.repository';
 import { JwtStrategy } from './infrastructure/strategies/jwt.strategy';
+import { RegisterUseCase } from './application/use-cases/register.use-case';
+import { SessionRepository } from './domain/repositories/session.repository';
+import { AuthController } from './presentation/http/controllers/auth.controller';
+import { RefreshTokenUseCase } from './application/use-cases/refresh-token.use-case';
+import { PrismaUserRepository } from './infrastructure/persistence/prisma-user.repository';
+import { AccessTokenService } from './application/contracts/access-token-service.contract';
+import { JwtAccessTokenService } from './infrastructure/services/jwt-access-token.service';
+import { RefreshTokenService } from './application/contracts/refresh-token-service.contract';
+import { JwtRefreshTokenService } from './infrastructure/services/jwt-refresh-token.service';
+import { PrismaSessionRepository } from './infrastructure/persistence/prisma-session.repository';
 
 @Module({
-    imports: [
-        JwtModule.registerAsync({
-            inject: [ConfigService],
-            useFactory: (configService: ConfigService) => ({
-                secret: configService.get<string>('JWT_SECRET'),
-            }),
-        }),
-    ],
+    imports: [JwtModule.register({})],
     controllers: [AuthController],
     providers: [
         RegisterUseCase,
@@ -40,8 +35,12 @@ import { JwtStrategy } from './infrastructure/strategies/jwt.strategy';
             useClass: PrismaSessionRepository,
         },
         {
-            provide: TokenService,
-            useClass: JwtTokenService,
+            provide: AccessTokenService,
+            useClass: JwtAccessTokenService,
+        },
+        {
+            provide: RefreshTokenService,
+            useClass: JwtRefreshTokenService,
         },
     ],
 })

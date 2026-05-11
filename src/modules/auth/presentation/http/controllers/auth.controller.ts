@@ -78,18 +78,18 @@ export class AuthController {
     @Post('refresh')
     async refresh(
         @Body() dto: RefreshTokenDto,
-        @Headers('user-agent') userAgent: string,
         @Ip() ipAddress: string,
+        @Headers('user-agent') userAgent: string | undefined,
     ) {
         const tokens = await this.refreshTokenUseCase.execute(dto, {
             ipAddress,
-            userAgent,
+            userAgent: userAgent ?? 'unknown',
         });
 
         return AuthResponseMapper.toLoginResponse(tokens);
     }
 
-    @ApiBearerAuth()
+    @ApiBearerAuth('access-token')
     @UseGuards(JwtAuthGuard)
     @Get('me')
     getMe(

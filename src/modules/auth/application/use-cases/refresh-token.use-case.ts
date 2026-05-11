@@ -3,27 +3,33 @@ import { randomUUID } from 'crypto';
 import { Injectable } from '@nestjs/common';
 import { addTime } from '@src/shared/utils/date/add-time';
 import { Session } from '@modules/auth/domain/entities/session.entity';
-import { authConfig } from '@modules/auth/infrastructure/config/auth.config';
+import { createAuthConfig } from '@modules/auth/infrastructure/config/auth.config';
 import { HashService } from '@modules/auth/infrastructure/services/hash.service';
 import { SessionRepository } from '@modules/auth/domain/repositories/session.repository';
-import { TokenService } from '@modules/auth/application/contracts/token-service.contract';
 import { InvalidCredentialsError } from '@modules/auth/domain/errors/auth-exceptions.error';
+import { AccessTokenService } from '@modules/auth/application/contracts/access-token-service.contract';
+import { RefreshTokenService } from '@modules/auth/application/contracts/refresh-token-service.contract';
 
 import { RefreshTokenDto } from '../dto/refresh-token.dto';
 import { RequestMetadataDto } from '../dto/request-metadata.dto';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class RefreshTokenUseCase {
     constructor(
         private readonly sessionRepository: SessionRepository,
-        private readonly tokenService: TokenService,
         private hashService: HashService,
+        private readonly accessTokenService: AccessTokenService,
+        private readonly refreshTokenService: RefreshTokenService,
+        private readonly config: ConfigService,
     ) {}
 
+    private get authConfig() {
+        return createAuthConfig(this.config);
+    }
+
     async execute(dto: RefreshTokenDto, metadata: RequestMetadataDto) {
-        const payload = await this.tokenService.verifyRefreshToken(
-            dto.refreshToken,
-        );
+        const payload = await this.refreshTokenService.verify(dto.refreshToken);
 
         const currentSession = await this.sessionRepository.findById(
             payload.sessionId,
@@ -59,7 +65,7 @@ export class RefreshTokenUseCase {
             sessionId: newSessionId,
         };
         const refreshToken =
-            await this.tokenService.generateRefreshToken(newPayload);
+            await this.refreshTokenService.generate(newPayload);
 
         const refreshTokenHash = await this.hashService.hash(refreshToken);
 
@@ -71,13 +77,12 @@ export class RefreshTokenUseCase {
             ipAddress: metadata.ipAddress,
             userAgent: metadata.userAgent,
 
-            expiresAt: addTime(authConfig.refreshTokenExpiresIn),
+            expiresAt: addTime(this.authConfig.refreshTokenExpiresIn),
         });
 
         await this.sessionRepository.save(newSession);
 
-        const accessToken =
-            await this.tokenService.generateAccessToken(newPayload);
+        const accessToken = await this.accessTokenService.generate(newPayload);
 
         return {
             accessToken,
