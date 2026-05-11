@@ -1,4 +1,4 @@
-import { InvalidEmailError } from '../errors/auth-exceptions.error';
+import { AuthErrors } from '../errors/auth-error.factory';
 
 export class Email {
     private constructor(private readonly value: string) {}
@@ -9,7 +9,7 @@ export class Email {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
         if (!emailRegex.test(normalizedEmail)) {
-            throw new InvalidEmailError();
+            throw AuthErrors.invalidEmail();
         }
 
         return new Email(normalizedEmail);

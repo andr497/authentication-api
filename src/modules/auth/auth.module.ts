@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
 
 import { HashService } from './infrastructure/services/hash.service';
 import { LoginUseCase } from './application/use-cases/login.use-case';
@@ -16,6 +15,7 @@ import { JwtAccessTokenService } from './infrastructure/services/jwt-access-toke
 import { RefreshTokenService } from './application/contracts/refresh-token-service.contract';
 import { JwtRefreshTokenService } from './infrastructure/services/jwt-refresh-token.service';
 import { PrismaSessionRepository } from './infrastructure/persistence/prisma-session.repository';
+import { LogoutUseCase } from './application/use-cases/logout.use-case';
 
 @Module({
     imports: [JwtModule.register({})],
@@ -24,6 +24,8 @@ import { PrismaSessionRepository } from './infrastructure/persistence/prisma-ses
         RegisterUseCase,
         LoginUseCase,
         RefreshTokenUseCase,
+        LogoutUseCase,
+
         HashService,
         JwtStrategy,
         {

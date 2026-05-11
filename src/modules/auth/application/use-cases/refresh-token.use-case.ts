@@ -6,13 +6,13 @@ import { Session } from '@modules/auth/domain/entities/session.entity';
 import { createAuthConfig } from '@modules/auth/infrastructure/config/auth.config';
 import { HashService } from '@modules/auth/infrastructure/services/hash.service';
 import { SessionRepository } from '@modules/auth/domain/repositories/session.repository';
-import { InvalidCredentialsError } from '@modules/auth/domain/errors/auth-exceptions.error';
 import { AccessTokenService } from '@modules/auth/application/contracts/access-token-service.contract';
 import { RefreshTokenService } from '@modules/auth/application/contracts/refresh-token-service.contract';
 
 import { RefreshTokenDto } from '../dto/refresh-token.dto';
 import { RequestMetadataDto } from '../dto/request-metadata.dto';
 import { ConfigService } from '@nestjs/config';
+import { AuthErrors } from '../../domain/errors/auth-error.factory';
 
 @Injectable()
 export class RefreshTokenUseCase {
@@ -36,15 +36,15 @@ export class RefreshTokenUseCase {
         );
 
         if (!currentSession) {
-            throw new InvalidCredentialsError();
+            throw AuthErrors.invalidCredentials();
         }
 
         if (currentSession.revokedAt) {
-            throw new InvalidCredentialsError();
+            throw AuthErrors.invalidCredentials();
         }
 
         if (currentSession.expiresAt < new Date()) {
-            throw new InvalidCredentialsError();
+            throw AuthErrors.invalidCredentials();
         }
 
         const matches = await this.hashService.compare(
@@ -53,7 +53,7 @@ export class RefreshTokenUseCase {
         );
 
         if (!matches) {
-            throw new InvalidCredentialsError();
+            throw AuthErrors.invalidCredentials();
         }
 
         await this.sessionRepository.revoke(currentSession.id);

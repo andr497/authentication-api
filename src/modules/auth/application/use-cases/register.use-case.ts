@@ -6,7 +6,7 @@ import { HashService } from '@modules/auth/infrastructure/services/hash.service'
 import { RegisterDto } from '../dto/register.dto';
 import { Email } from '@modules/auth/domain/value-objects/email.vo';
 import { Password } from '@modules/auth/domain/value-objects/password.vo';
-import { UserAlreadyExistsError } from '../../domain/errors/auth-exceptions.error';
+import { AuthErrors } from '../../domain/errors/auth-error.factory';
 
 @Injectable()
 export class RegisterUseCase {
@@ -24,7 +24,7 @@ export class RegisterUseCase {
         );
 
         if (existingUser) {
-            throw new UserAlreadyExistsError();
+            throw AuthErrors.userAlreadyExists();
         }
 
         const hashedPassword = await this.hashService.hash(password.getValue());

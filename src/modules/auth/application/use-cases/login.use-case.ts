@@ -7,13 +7,13 @@ import { createAuthConfig } from '@modules/auth/infrastructure/config/auth.confi
 import { HashService } from '@modules/auth/infrastructure/services/hash.service';
 import { UserRepository } from '@modules/auth/domain/repositories/user.repository';
 import { SessionRepository } from '@modules/auth/domain/repositories/session.repository';
-import { InvalidCredentialsError } from '@modules/auth/domain/errors/auth-exceptions.error';
 import { AccessTokenService } from '@modules/auth/application/contracts/access-token-service.contract';
 import { RefreshTokenService } from '@modules/auth/application/contracts/refresh-token-service.contract';
 
 import { LoginDto } from '../dto/login.dto';
 import { RequestMetadataDto } from '../dto/request-metadata.dto';
 import { ConfigService } from '@nestjs/config';
+import { AuthErrors } from '../../domain/errors/auth-error.factory';
 
 @Injectable()
 export class LoginUseCase {
@@ -34,7 +34,7 @@ export class LoginUseCase {
         const user = await this.userRepository.findByEmail(dto.email);
 
         if (!user) {
-            throw new InvalidCredentialsError();
+            throw AuthErrors.invalidCredentials();
         }
 
         const isValidPassword = await this.hashService.compare(
@@ -43,7 +43,7 @@ export class LoginUseCase {
         );
 
         if (!isValidPassword) {
-            throw new InvalidCredentialsError();
+            throw AuthErrors.invalidCredentials();
         }
 
         const sessionId = randomUUID();

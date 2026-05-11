@@ -1,11 +1,11 @@
-import { WeakPasswordError } from '../errors/auth-exceptions.error';
+import { AuthErrors } from '../errors/auth-error.factory';
 
 export class Password {
     private constructor(private readonly value: string) {}
 
     static create(value: string): Password {
         if (!value || value.length < 8) {
-            throw new WeakPasswordError();
+            throw AuthErrors.weakPassword();
         }
 
         return new Password(value);

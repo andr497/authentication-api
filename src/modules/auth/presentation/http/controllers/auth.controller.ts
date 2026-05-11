@@ -1,32 +1,37 @@
+import { LoginDto } from '@src/modules/auth/application/dto/login.dto';
 import { RegisterDto } from '@modules/auth/application/dto/register.dto';
-import { RegisterUseCase } from '@modules/auth/application/use-cases/register.use-case';
 import {
     Body,
     Controller,
+    Get,
+    Headers,
+    HttpCode,
+    HttpStatus,
     Ip,
     Post,
-    Headers,
-    Get,
     UseGuards,
 } from '@nestjs/common';
-import { AuthResponseMapper } from '../mappers/auth-response.mapper';
+import { LoginUseCase } from '@src/modules/auth/application/use-cases/login.use-case';
+import { RefreshTokenDto } from '@src/modules/auth/application/dto/refresh-token.dto';
+import { JwtAuthGuard } from '@src/modules/auth/infrastructure/guards/jwt-auth.guard';
+import { RegisterUseCase } from '@modules/auth/application/use-cases/register.use-case';
+import { LogoutUseCase } from '@src/modules/auth/application/use-cases/logout.use-case';
+import { RefreshTokenUseCase } from '@src/modules/auth/application/use-cases/refresh-token.use-case';
 import {
     ApiBadRequestResponse,
     ApiBearerAuth,
     ApiConflictResponse,
     ApiCreatedResponse,
+    ApiNoContentResponse,
     ApiOperation,
     ApiTags,
     ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
-import { RegisterResponse } from '../responses/register.response';
-import { LoginDto } from '@src/modules/auth/application/dto/login.dto';
-import { LoginUseCase } from '@src/modules/auth/application/use-cases/login.use-case';
-import { RefreshTokenDto } from '@src/modules/auth/application/dto/refresh-token.dto';
-import { RefreshTokenUseCase } from '@src/modules/auth/application/use-cases/refresh-token.use-case';
-import { CurrentUser } from '../decorators/current-user.decorator';
-import { JwtAuthGuard } from '@src/modules/auth/infrastructure/guards/jwt-auth.guard';
+
 import type { AuthUser } from '../types/auth-user.type';
+import { RegisterResponse } from '../responses/register.response';
+import { CurrentUser } from '../decorators/current-user.decorator';
+import { AuthResponseMapper } from '../mappers/auth-response.mapper';
 
 @Controller('auth')
 @ApiTags('Authentication')
@@ -35,6 +40,7 @@ export class AuthController {
         private readonly registerUseCase: RegisterUseCase,
         private readonly loginUseCase: LoginUseCase,
         private readonly refreshTokenUseCase: RefreshTokenUseCase,
+        private readonly logoutUseCase: LogoutUseCase,
     ) {}
 
     @Post('register')
@@ -87,6 +93,14 @@ export class AuthController {
         });
 
         return AuthResponseMapper.toLoginResponse(tokens);
+    }
+
+    @Post('logout')
+    @ApiNoContentResponse()
+    @HttpCode(HttpStatus.NO_CONTENT)
+    async logout(@Body() dto: RefreshTokenDto) {
+        await this.logoutUseCase.execute(dto);
+        return;
     }
 
     @ApiBearerAuth('access-token')
