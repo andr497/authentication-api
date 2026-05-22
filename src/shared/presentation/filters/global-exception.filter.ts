@@ -1,17 +1,19 @@
 import { ArgumentsHost, Catch, ExceptionFilter } from '@nestjs/common';
+import { ExceptionReporter } from '@src/shared/infrastructure/exceptions/contracts/exception-reporter.contract';
 import { ExceptionHandlerResolver } from '@src/shared/infrastructure/exceptions/exception-handler.resolver';
-import { LoggerService } from '@src/shared/infrastructure/logging/logger.service';
+import { LogService } from '@src/shared/infrastructure/logging/contracts/log-service.contract';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
     constructor(
         private readonly resolver: ExceptionHandlerResolver,
-        private readonly logger: LoggerService,
+        private readonly logger: LogService,
+        private readonly reporter: ExceptionReporter,
     ) {}
 
     catch(exception: unknown, host: ArgumentsHost) {
         const handler = this.resolver.resolve(exception);
 
-        return handler.handle(exception, host, this.logger);
+        return handler.handle(exception, host, this.logger, this.reporter);
     }
 }

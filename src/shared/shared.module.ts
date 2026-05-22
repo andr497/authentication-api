@@ -1,22 +1,22 @@
-import { APP_FILTER } from '@nestjs/core';
 import { Module } from '@nestjs/common';
+import { APP_FILTER } from '@nestjs/core';
 
-import { LoggerService } from './infrastructure/logging/logger.service';
 import { GlobalExceptionFilter } from './presentation/filters/global-exception.filter';
 import { ExceptionHandlerResolver } from './infrastructure/exceptions/exception-handler.resolver';
+import { ExceptionReporter } from './infrastructure/exceptions/contracts/exception-reporter.contract';
+import { FileExceptionReporter } from './infrastructure/exceptions/service/file-exception-reporter.service';
 
 @Module({
     providers: [
-        LoggerService,
-
         ExceptionHandlerResolver,
-
+        {
+            provide: ExceptionReporter,
+            useClass: FileExceptionReporter,
+        },
         {
             provide: APP_FILTER,
             useClass: GlobalExceptionFilter,
         },
     ],
-
-    exports: [LoggerService],
 })
 export class SharedModule {}

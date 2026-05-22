@@ -2,48 +2,26 @@ import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 
 import { HashService } from './infrastructure/services/hash.service';
-import { LoginUseCase } from './application/use-cases/login.use-case';
-import { UserRepository } from './domain/repositories/user.repository';
 import { JwtStrategy } from './infrastructure/strategies/jwt.strategy';
-import { RegisterUseCase } from './application/use-cases/register.use-case';
-import { SessionRepository } from './domain/repositories/session.repository';
 import { AuthController } from './presentation/http/controllers/auth.controller';
-import { RefreshTokenUseCase } from './application/use-cases/refresh-token.use-case';
-import { PrismaUserRepository } from './infrastructure/persistence/prisma-user.repository';
-import { AccessTokenService } from './application/contracts/access-token-service.contract';
-import { JwtAccessTokenService } from './infrastructure/services/jwt-access-token.service';
-import { RefreshTokenService } from './application/contracts/refresh-token-service.contract';
-import { JwtRefreshTokenService } from './infrastructure/services/jwt-refresh-token.service';
-import { PrismaSessionRepository } from './infrastructure/persistence/prisma-session.repository';
-import { LogoutUseCase } from './application/use-cases/logout.use-case';
+import { servicesProviders } from './infrastructure/providers/services.providers';
+import { useCasesProviders } from './infrastructure/providers/use-cases.providers';
+import { repositoriesProviders } from './infrastructure/providers/repositories.providers';
+import { VerificationEmailService } from './application/services/verification-email.service';
+import { LoggerService } from '@src/shared/infrastructure/logging/services/logger.service';
 
 @Module({
     imports: [JwtModule.register({})],
     controllers: [AuthController],
     providers: [
-        RegisterUseCase,
-        LoginUseCase,
-        RefreshTokenUseCase,
-        LogoutUseCase,
+        ...useCasesProviders,
+        ...repositoriesProviders,
+        ...servicesProviders,
 
         HashService,
         JwtStrategy,
-        {
-            provide: UserRepository,
-            useClass: PrismaUserRepository,
-        },
-        {
-            provide: SessionRepository,
-            useClass: PrismaSessionRepository,
-        },
-        {
-            provide: AccessTokenService,
-            useClass: JwtAccessTokenService,
-        },
-        {
-            provide: RefreshTokenService,
-            useClass: JwtRefreshTokenService,
-        },
+        VerificationEmailService,
+        LoggerService,
     ],
 })
 export class AuthModule {}

@@ -19,4 +19,16 @@ export class AuthErrors {
     static invalidCredentials(message: string = 'Invalid credentials') {
         return new AuthError(AuthErrorCode.INVALID_CREDENTIALS, 401, message);
     }
+
+    static accountDisabled(message: string = 'Account disabled') {
+        return new AuthError(AuthErrorCode.ACCOUNT_DISABLED, 401, message);
+    }
+
+    static emailNotVerified(message: string = 'Account disabled') {
+        return new AuthError(AuthErrorCode.EMAIL_NOT_VERIFIED, 401, message);
+    }
+
+    static invalidToken(message: string = 'Invalid token') {
+        return new AuthError(AuthErrorCode.INVALID_TOKEN, 401, message);
+    }
 }

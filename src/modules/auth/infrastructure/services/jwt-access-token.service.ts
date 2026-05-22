@@ -1,21 +1,22 @@
-import { Injectable } from '@nestjs/common';
-import { AccessTokenService } from '../../application/contracts/access-token-service.contract';
 import { JwtService } from '@nestjs/jwt';
-import { AccessTokenPayload } from '../../application/types/access-token-payload.type';
-import { createAuthConfig } from '../config/auth.config';
-import { ConfigService } from '@nestjs/config';
+import { Injectable } from '@nestjs/common';
+import { AccessTokenPayload } from '@modules/auth/application/types/access-token-payload.type';
+import { AccessTokenService } from '@modules/auth/application/contracts/access-token-service.contract';
+
+import { EnvService } from '@src/config/env.service';
+import { createAuthConfig } from '@src/config/auth.config';
 
 @Injectable()
 export class JwtAccessTokenService extends AccessTokenService {
     constructor(
         private readonly jwtService: JwtService,
-        private readonly config: ConfigService,
+        private readonly env: EnvService,
     ) {
         super();
     }
 
     private get authConfig() {
-        return createAuthConfig(this.config);
+        return createAuthConfig(this.env);
     }
 
     async generate(payload: AccessTokenPayload): Promise<string> {
@@ -27,6 +28,7 @@ export class JwtAccessTokenService extends AccessTokenService {
             {
                 expiresIn: this.authConfig.accessTokenExpiresIn,
                 secret: this.authConfig.accessTokenSecret,
+                issuer: this.authConfig.issuer,
             },
         );
     }
@@ -34,6 +36,7 @@ export class JwtAccessTokenService extends AccessTokenService {
     async verify(token: string): Promise<AccessTokenPayload> {
         return this.jwtService.verifyAsync(token, {
             secret: this.authConfig.accessTokenSecret,
+            issuer: this.authConfig.issuer,
         });
     }
 }

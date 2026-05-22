@@ -17,6 +17,22 @@ export class User {
         return new User(params.id, params.email, params.password, false, true);
     }
 
+    static restore(params: {
+        id: string;
+        email: Email;
+        password: string;
+        isVerified: boolean;
+        isActive: boolean;
+    }): User {
+        return new User(
+            params.id,
+            params.email,
+            params.password,
+            params.isVerified,
+            params.isActive,
+        );
+    }
+
     verifyEmail() {
         this.isVerified = true;
     }

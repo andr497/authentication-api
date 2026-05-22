@@ -1,7 +1,8 @@
 import { ArgumentsHost } from '@nestjs/common';
-import { ExceptionHandlerStrategy } from '../contracts/exception-handler.contract';
 import { DomainError } from '@src/shared/domain/errors/domain-error';
-import { LoggerService } from '../../logging/logger.service';
+
+import { LogService } from '../../logging/contracts/log-service.contract';
+import { ExceptionHandlerStrategy } from '../contracts/exception-handler.contract';
 
 export class DomainExceptionHandler implements ExceptionHandlerStrategy {
     canHandle(exception: unknown): boolean {
@@ -11,11 +12,13 @@ export class DomainExceptionHandler implements ExceptionHandlerStrategy {
     handle(
         exception: DomainError,
         host: ArgumentsHost,
-        logger: LoggerService,
+        logger: LogService,
     ): void {
         const response = host.switchToHttp().getResponse();
 
-        logger.logError(exception.message, exception.stack);
+        logger.warn(exception.message, DomainExceptionHandler.name, {
+            code: exception.code,
+        });
         return response.status(exception.statusCode).json({
             code: exception.code,
             message: exception.message,

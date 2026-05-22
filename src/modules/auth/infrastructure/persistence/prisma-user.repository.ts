@@ -5,6 +5,9 @@ import { PrismaService } from '@infrastructure/database/prisma/prisma.service';
 import { UserRepository } from '@modules/auth/domain/repositories/user.repository';
 import { User } from '@modules/auth/domain/entities/user.entity';
 import { UserMapper } from '@modules/auth/infrastructure/mappers/user.mapper';
+import { PrismaQueryHelper } from '@src/infrastructure/database/prisma/helpers/prisma-query.helper';
+import { RepositoryOptions } from '@src/shared/domain/types/repository-options.type';
+import { UserWhereInput } from '@prisma-client/models';
 
 @Injectable()
 export class PrismaUserRepository extends UserRepository {
@@ -20,11 +23,27 @@ export class PrismaUserRepository extends UserRepository {
         return UserMapper.toDomain(savedUser);
     }
 
-    async findById(id: string): Promise<User | null> {
-        const user = await this.prisma.user.findUnique({
+    async update(user: User): Promise<User> {
+        const updatedUser: PrismaUser = await this.prisma.user.update({
             where: {
-                id,
+                id: user.id,
             },
+            data: UserMapper.toPersistence(user),
+        });
+        return UserMapper.toDomain(updatedUser);
+    }
+
+    async findById(
+        id: string,
+        options?: RepositoryOptions,
+    ): Promise<User | null> {
+        const user = await this.prisma.user.findFirst({
+            where: PrismaQueryHelper.applyScope<UserWhereInput>(
+                {
+                    id,
+                },
+                options,
+            ),
         });
 
         if (!user) {
@@ -34,11 +53,17 @@ export class PrismaUserRepository extends UserRepository {
         return UserMapper.toDomain(user);
     }
 
-    async findByEmail(email: string): Promise<User | null> {
-        const user = await this.prisma.user.findUnique({
-            where: {
-                email,
-            },
+    async findByEmail(
+        email: string,
+        options?: RepositoryOptions,
+    ): Promise<User | null> {
+        const user = await this.prisma.user.findFirst({
+            where: PrismaQueryHelper.applyScope<UserWhereInput>(
+                {
+                    email,
+                },
+                options,
+            ),
         });
 
         if (!user) {

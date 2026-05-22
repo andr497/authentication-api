@@ -2,21 +2,20 @@ import { JwtService } from '@nestjs/jwt';
 import { Injectable } from '@nestjs/common';
 import { RefreshTokenPayload } from '@modules/auth/application/types/refresh-token-payload.type';
 import { RefreshTokenService } from '@modules/auth/application/contracts/refresh-token-service.contract';
-
-import { createAuthConfig } from '../config/auth.config';
-import { ConfigService } from '@nestjs/config';
+import { EnvService } from '@src/config/env.service';
+import { createAuthConfig } from '@src/config/auth.config';
 
 @Injectable()
 export class JwtRefreshTokenService extends RefreshTokenService {
     constructor(
         private readonly jwtService: JwtService,
-        private readonly config: ConfigService,
+        private readonly env: EnvService,
     ) {
         super();
     }
 
     private get authConfig() {
-        return createAuthConfig(this.config);
+        return createAuthConfig(this.env);
     }
 
     async generate(payload: RefreshTokenPayload): Promise<string> {
@@ -28,6 +27,7 @@ export class JwtRefreshTokenService extends RefreshTokenService {
             {
                 expiresIn: this.authConfig.refreshTokenExpiresIn,
                 secret: this.authConfig.refreshTokenSecret,
+                issuer: this.authConfig.issuer,
             },
         );
     }
@@ -35,6 +35,7 @@ export class JwtRefreshTokenService extends RefreshTokenService {
     async verify(token: string): Promise<RefreshTokenPayload> {
         return this.jwtService.verifyAsync(token, {
             secret: this.authConfig.refreshTokenSecret,
+            issuer: this.authConfig.issuer,
         });
     }
 }

@@ -1,19 +1,19 @@
-import { Prisma, User as PrismaUser } from '@prisma-client/client';
+import { User as PrismaUser } from '@prisma-client/client';
 import { User } from '@modules/auth/domain/entities/user.entity';
 import { Email } from '@modules/auth/domain/value-objects/email.vo';
 
 export class UserMapper {
     static toDomain(data: PrismaUser): User {
-        return new User(
-            data.id,
-            Email.create(data.email),
-            data.password,
-            data.isVerified,
-            data.isActive,
-        );
+        return User.restore({
+            id: data.id,
+            email: Email.create(data.email),
+            password: data.password,
+            isVerified: data.isVerified,
+            isActive: data.isActive,
+        });
     }
 
-    static toPersistence(user: User): Prisma.UserCreateInput {
+    static toPersistence(user: User) {
         return {
             id: user.id,
             email: user.email.getValue(),

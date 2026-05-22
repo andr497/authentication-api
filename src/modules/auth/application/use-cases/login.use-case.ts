@@ -1,9 +1,11 @@
 import { randomUUID } from 'crypto';
 
 import { Injectable } from '@nestjs/common';
+import { EnvService } from '@src/config/env.service';
 import { addTime } from '@src/shared/utils/date/add-time';
+import { createAuthConfig } from '@src/config/auth.config';
 import { Session } from '@modules/auth/domain/entities/session.entity';
-import { createAuthConfig } from '@modules/auth/infrastructure/config/auth.config';
+import { AuthErrors } from '@modules/auth/domain/errors/auth-error.factory';
 import { HashService } from '@modules/auth/infrastructure/services/hash.service';
 import { UserRepository } from '@modules/auth/domain/repositories/user.repository';
 import { SessionRepository } from '@modules/auth/domain/repositories/session.repository';
@@ -12,8 +14,6 @@ import { RefreshTokenService } from '@modules/auth/application/contracts/refresh
 
 import { LoginDto } from '../dto/login.dto';
 import { RequestMetadataDto } from '../dto/request-metadata.dto';
-import { ConfigService } from '@nestjs/config';
-import { AuthErrors } from '../../domain/errors/auth-error.factory';
 
 @Injectable()
 export class LoginUseCase {
@@ -23,11 +23,11 @@ export class LoginUseCase {
         private readonly hashService: HashService,
         private readonly accessTokenService: AccessTokenService,
         private readonly refreshTokenService: RefreshTokenService,
-        private readonly config: ConfigService,
+        private readonly env: EnvService,
     ) {}
 
     private get authConfig() {
-        return createAuthConfig(this.config);
+        return createAuthConfig(this.env);
     }
 
     async execute(dto: LoginDto, metadata: RequestMetadataDto) {
@@ -44,6 +44,14 @@ export class LoginUseCase {
 
         if (!isValidPassword) {
             throw AuthErrors.invalidCredentials();
+        }
+
+        if (!user.isActive) {
+            throw AuthErrors.accountDisabled();
+        }
+
+        if (this.authConfig.emailVerificationEnabled && !user.isVerified) {
+            throw AuthErrors.emailNotVerified();
         }
 
         const sessionId = randomUUID();

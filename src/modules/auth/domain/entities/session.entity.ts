@@ -16,6 +16,25 @@ export class Session {
         userAgent?: string | null;
         ipAddress?: string | null;
         expiresAt: Date;
+    }): Session {
+        return new Session(
+            params.id,
+            params.userId,
+            params.refreshTokenHash,
+            params.userAgent ?? null,
+            params.ipAddress ?? null,
+            params.expiresAt,
+            null,
+        );
+    }
+
+    static restore(params: {
+        id: string;
+        userId: string;
+        refreshTokenHash: string;
+        userAgent?: string | null;
+        ipAddress?: string | null;
+        expiresAt: Date;
         revokedAt?: Date | null;
     }): Session {
         return new Session(

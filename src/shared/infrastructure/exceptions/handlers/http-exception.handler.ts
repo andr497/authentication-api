@@ -1,6 +1,7 @@
 import { ArgumentsHost, HttpException } from '@nestjs/common';
 import { ExceptionHandlerStrategy } from '../contracts/exception-handler.contract';
-import { LoggerService } from '../../logging/logger.service';
+import { LogService } from '../../logging/contracts/log-service.contract';
+import { sanitizeStack } from '@src/shared/utils/exceptions/sanitize-stack';
 
 export class HttpExceptionHandler implements ExceptionHandlerStrategy {
     canHandle(exception: unknown): boolean {
@@ -10,14 +11,14 @@ export class HttpExceptionHandler implements ExceptionHandlerStrategy {
     handle(
         exception: HttpException,
         host: ArgumentsHost,
-        logger: LoggerService,
+        logger: LogService,
     ): void {
         const response = host.switchToHttp().getResponse();
 
         const status = exception.getStatus();
         const error = exception.getResponse();
 
-        logger.logError(exception.message, exception.stack);
+        logger.error(exception.message, sanitizeStack(exception.stack).join());
         return response.status(status).json(error);
     }
 }

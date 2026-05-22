@@ -9,6 +9,7 @@ import {
     HttpStatus,
     Ip,
     Post,
+    Query,
     UseGuards,
 } from '@nestjs/common';
 import { LoginUseCase } from '@src/modules/auth/application/use-cases/login.use-case';
@@ -32,6 +33,8 @@ import type { AuthUser } from '../types/auth-user.type';
 import { RegisterResponse } from '../responses/register.response';
 import { CurrentUser } from '../decorators/current-user.decorator';
 import { AuthResponseMapper } from '../mappers/auth-response.mapper';
+import { VerifyEmailUseCase } from '@src/modules/auth/application/use-cases/verify-email.use-case';
+import { VerifyEmailDto } from '@src/modules/auth/application/dto/verify-email.dto';
 
 @Controller('auth')
 @ApiTags('Authentication')
@@ -41,6 +44,7 @@ export class AuthController {
         private readonly loginUseCase: LoginUseCase,
         private readonly refreshTokenUseCase: RefreshTokenUseCase,
         private readonly logoutUseCase: LogoutUseCase,
+        private readonly verifyEmailUseCase: VerifyEmailUseCase,
     ) {}
 
     @Post('register')
@@ -101,6 +105,15 @@ export class AuthController {
     async logout(@Body() dto: RefreshTokenDto) {
         await this.logoutUseCase.execute(dto);
         return;
+    }
+
+    @Get('verify-email')
+    async verifyEmail(@Query() dto: VerifyEmailDto) {
+        await this.verifyEmailUseCase.execute(dto);
+
+        return {
+            message: 'Email verified successfully',
+        };
     }
 
     @ApiBearerAuth('access-token')
