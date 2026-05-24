@@ -1,9 +1,9 @@
 import { randomUUID } from 'crypto';
 
 import { Injectable } from '@nestjs/common';
-import { EnvService } from '@src/config/env.service';
-import { addTime } from '@src/shared/utils/date/add-time';
-import { createAuthConfig } from '@src/config/auth.config';
+import { EnvService } from '@config/env.service';
+import { addTime } from '@shared/utils/date/add-time';
+import { createAuthConfig } from '@config/auth.config';
 import { User } from '@modules/auth/domain/entities/user.entity';
 import { Email } from '@modules/auth/domain/value-objects/email.vo';
 import { Password } from '@modules/auth/domain/value-objects/password.vo';

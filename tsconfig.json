@@ -18,6 +18,7 @@
             "@modules/*": ["./src/modules/*"],
             "@infrastructure/*": ["./src/infrastructure/*"],
             "@shared/*": ["./src/shared/*"],
+            "@config/*": ["./src/config/*"],
             "@prisma-client": ["./generated/client/client"],
             "@prisma-client/*": ["./generated/client/*"]
         },

@@ -1,9 +1,9 @@
 import { PrismaPg } from '@prisma/adapter-pg';
+import { EnvService } from '@config/env.service';
 import { PrismaClient } from '@prisma-client/client';
-import { EnvService } from '@src/config/env.service';
-import { createAppConfig } from '@src/config/app.config';
+import { createAppConfig } from '@config/app.config';
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import { createDatabaseConfig } from '@src/config/database.config';
+import { createDatabaseConfig } from '@config/database.config';
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit {

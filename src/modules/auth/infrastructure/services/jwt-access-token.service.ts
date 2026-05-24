@@ -1,10 +1,9 @@
 import { JwtService } from '@nestjs/jwt';
 import { Injectable } from '@nestjs/common';
+import { EnvService } from '@config/env.service';
+import { createAuthConfig } from '@config/auth.config';
 import { AccessTokenPayload } from '@modules/auth/application/types/access-token-payload.type';
 import { AccessTokenService } from '@modules/auth/application/contracts/access-token-service.contract';
-
-import { EnvService } from '@src/config/env.service';
-import { createAuthConfig } from '@src/config/auth.config';
 
 @Injectable()
 export class JwtAccessTokenService extends AccessTokenService {

@@ -1,4 +1,4 @@
-import { RepositoryOptions } from '@src/shared/domain/types/repository-options.type';
+import { RepositoryOptions } from '@shared/domain/types/repository-options.type';
 
 export class PrismaQueryHelper {
     static applyScope<T extends { deletedAt?: unknown }>(

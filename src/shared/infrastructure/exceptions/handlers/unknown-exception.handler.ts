@@ -1,5 +1,5 @@
 import { ArgumentsHost, HttpStatus } from '@nestjs/common';
-import { sanitizeStack } from '@src/shared/utils/exceptions/sanitize-stack';
+import { sanitizeStack } from '@shared/utils/exceptions/sanitize-stack';
 
 import { LogService } from '../../logging/contracts/log-service.contract';
 import { ExceptionReporter } from '../contracts/exception-reporter.contract';

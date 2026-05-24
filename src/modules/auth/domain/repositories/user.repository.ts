@@ -1,4 +1,5 @@
-import { RepositoryOptions } from '@src/shared/domain/types/repository-options.type';
+import { RepositoryOptions } from '@shared/domain/types/repository-options.type';
+
 import { User } from '../entities/user.entity';
 
 export abstract class UserRepository {

@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { EnvService } from '@src/config/env.service';
-import { createAppConfig } from '@src/config/app.config';
-import { LoggerService } from '@src/shared/infrastructure/logging/services/logger.service';
-import { ExceptionReporter } from '@src/shared/infrastructure/exceptions/contracts/exception-reporter.contract';
+import { EnvService } from '@config/env.service';
+import { createAppConfig } from '@config/app.config';
+import { LoggerService } from '@shared/infrastructure/logging/services/logger.service';
+import { ExceptionReporter } from '@shared/infrastructure/exceptions/contracts/exception-reporter.contract';
 
 import { EmailService } from '../contracts/email-service.contract';
 

@@ -1,13 +1,13 @@
 import * as fs from 'fs';
 import * as path from 'path';
-
-import { Injectable } from '@nestjs/common';
 import { createStream } from 'rotating-file-stream';
 
+import { Injectable } from '@nestjs/common';
+import { EnvService } from '@config/env.service';
+import { sanitizeStack } from '@shared/utils/exceptions/sanitize-stack';
+import { createLoggingConfig, LoggingConfig } from '@config/logging.config';
+
 import { ExceptionReporter } from '../contracts/exception-reporter.contract';
-import { EnvService } from '@src/config/env.service';
-import { createLoggingConfig, LoggingConfig } from '@src/config/logging.config';
-import { sanitizeStack } from '@src/shared/utils/exceptions/sanitize-stack';
 
 @Injectable()
 export class FileExceptionReporter extends ExceptionReporter {
@@ -21,9 +21,7 @@ export class FileExceptionReporter extends ExceptionReporter {
         this.ensureLogsDirectoryExists();
         this.stream = createStream(this.getFilename(), {
             interval: this.config.driver === 'daily' ? '1d' : undefined,
-
             path: path.join(process.cwd(), this.config.directory),
-
             maxFiles: this.config.maxDays,
         });
     }

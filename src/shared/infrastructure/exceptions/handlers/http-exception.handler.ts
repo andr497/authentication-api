@@ -1,7 +1,8 @@
 import { ArgumentsHost, HttpException } from '@nestjs/common';
-import { ExceptionHandlerStrategy } from '../contracts/exception-handler.contract';
+import { sanitizeStack } from '@shared/utils/exceptions/sanitize-stack';
+
 import { LogService } from '../../logging/contracts/log-service.contract';
-import { sanitizeStack } from '@src/shared/utils/exceptions/sanitize-stack';
+import { ExceptionHandlerStrategy } from '../contracts/exception-handler.contract';
 
 export class HttpExceptionHandler implements ExceptionHandlerStrategy {
     canHandle(exception: unknown): boolean {

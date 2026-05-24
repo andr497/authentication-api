@@ -1,5 +1,5 @@
 import { ArgumentsHost } from '@nestjs/common';
-import { DomainError } from '@src/shared/domain/errors/domain-error';
+import { DomainError } from '@shared/domain/errors/domain-error';
 
 import { LogService } from '../../logging/contracts/log-service.contract';
 import { ExceptionHandlerStrategy } from '../contracts/exception-handler.contract';

@@ -1,13 +1,12 @@
 import { Injectable } from '@nestjs/common';
+import { UserWhereInput } from '@prisma-client/models';
 import { User as PrismaUser } from '@prisma-client/client';
-
-import { PrismaService } from '@infrastructure/database/prisma/prisma.service';
-import { UserRepository } from '@modules/auth/domain/repositories/user.repository';
 import { User } from '@modules/auth/domain/entities/user.entity';
 import { UserMapper } from '@modules/auth/infrastructure/mappers/user.mapper';
+import { PrismaService } from '@infrastructure/database/prisma/prisma.service';
+import { RepositoryOptions } from '@shared/domain/types/repository-options.type';
+import { UserRepository } from '@modules/auth/domain/repositories/user.repository';
 import { PrismaQueryHelper } from '@src/infrastructure/database/prisma/helpers/prisma-query.helper';
-import { RepositoryOptions } from '@src/shared/domain/types/repository-options.type';
-import { UserWhereInput } from '@prisma-client/models';
 
 @Injectable()
 export class PrismaUserRepository extends UserRepository {

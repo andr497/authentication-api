@@ -1,8 +1,8 @@
 import * as nodemailer from 'nodemailer';
 
 import { Injectable } from '@nestjs/common';
-import { EnvService } from '@src/config/env.service';
-import { createSMTPConfig, SMTPConfig } from '@src/config/smtp.config';
+import { EnvService } from '@config/env.service';
+import { createSMTPConfig, SMTPConfig } from '@config/smtp.config';
 import {
     EmailService,
     SendEmailOptions,

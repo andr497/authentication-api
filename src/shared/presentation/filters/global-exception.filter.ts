@@ -1,7 +1,7 @@
 import { ArgumentsHost, Catch, ExceptionFilter } from '@nestjs/common';
-import { ExceptionReporter } from '@src/shared/infrastructure/exceptions/contracts/exception-reporter.contract';
-import { ExceptionHandlerResolver } from '@src/shared/infrastructure/exceptions/exception-handler.resolver';
-import { LogService } from '@src/shared/infrastructure/logging/contracts/log-service.contract';
+import { LogService } from '@shared/infrastructure/logging/contracts/log-service.contract';
+import { ExceptionHandlerResolver } from '@shared/infrastructure/exceptions/exception-handler.resolver';
+import { ExceptionReporter } from '@shared/infrastructure/exceptions/contracts/exception-reporter.contract';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
