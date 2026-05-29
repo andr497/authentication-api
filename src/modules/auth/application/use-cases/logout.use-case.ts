@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { HashService } from '@modules/auth/infrastructure/services/hash.service';
 import { SessionRepository } from '@modules/auth/domain/repositories/session.repository';
 
 import { LogoutDto } from '../dto/logout.dto';
+import { HashService } from '../contracts/hash-service.contract';
 import { RefreshTokenService } from '../contracts/refresh-token-service.contract';
 
 @Injectable()

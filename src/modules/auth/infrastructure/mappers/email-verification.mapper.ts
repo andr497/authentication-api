@@ -9,6 +9,8 @@ export class EmailVerificationMapper {
             tokenHash: verification.tokenHash,
             expiresAt: verification.expiresAt,
             usedAt: verification.usedAt,
+
+            createdAt: verification.createdAt,
         });
     }
 

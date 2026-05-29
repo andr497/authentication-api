@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { HashService } from '@modules/auth/infrastructure/services/hash.service';
+import { AuthErrors } from '@modules/auth/domain/errors/auth-error.factory';
 import { UserRepository } from '@modules/auth/domain/repositories/user.repository';
+import { TransactionManager } from '@src/shared/application/contracts/transaction-manager.contract';
 import { EmailVerificationRepository } from '@modules/auth/domain/repositories/email-verification.repository';
 
 import { VerifyEmailDto } from '../dto/verify-email.dto';
-import { AuthErrors } from '../../domain/errors/auth-error.factory';
+import { HashService } from '../contracts/hash-service.contract';
 
 @Injectable()
 export class VerifyEmailUseCase {
@@ -12,6 +13,7 @@ export class VerifyEmailUseCase {
         private readonly userRepository: UserRepository,
         private readonly emailVerificationRepository: EmailVerificationRepository,
         private readonly hashService: HashService,
+        private readonly transaction: TransactionManager,
     ) {}
 
     async execute(dto: VerifyEmailDto) {
@@ -46,9 +48,11 @@ export class VerifyEmailUseCase {
             throw AuthErrors.invalidToken();
         }
 
-        user.verifyEmail();
-        await this.userRepository.update(user);
-        verification.markAsUsed();
-        await this.emailVerificationRepository.update(verification);
+        await this.transaction.run(async () => {
+            user.verifyEmail();
+            await this.userRepository.update(user);
+            verification.markAsUsed();
+            await this.emailVerificationRepository.update(verification);
+        });
     }
 }

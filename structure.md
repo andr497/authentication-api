@@ -36,7 +36,7 @@
     PASSWORD_RESETS {
         UUID id PK
         UUID user_id FK
-        string token
+        string token_hash
         datetime expires_at
         datetime used_at
         datetime created_at

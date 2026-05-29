@@ -8,13 +8,14 @@ import { User } from '@modules/auth/domain/entities/user.entity';
 import { Email } from '@modules/auth/domain/value-objects/email.vo';
 import { Password } from '@modules/auth/domain/value-objects/password.vo';
 import { AuthErrors } from '@modules/auth/domain/errors/auth-error.factory';
-import { HashService } from '@modules/auth/infrastructure/services/hash.service';
 import { UserRepository } from '@modules/auth/domain/repositories/user.repository';
 import { EmailVerification } from '@modules/auth/domain/entities/email-verification.entity';
 import { EmailVerificationRepository } from '@modules/auth/domain/repositories/email-verification.repository';
 
 import { RegisterDto } from '../dto/register.dto';
+import { HashService } from '../contracts/hash-service.contract';
 import { VerificationEmailService } from './../services/verification-email.service';
+import { TransactionManager } from '@src/shared/application/contracts/transaction-manager.contract';
 
 @Injectable()
 export class RegisterUseCase {
@@ -24,6 +25,7 @@ export class RegisterUseCase {
         private readonly verificationEmailService: VerificationEmailService,
         private readonly hashService: HashService,
         private readonly env: EnvService,
+        private readonly transaction: TransactionManager,
     ) {}
 
     private get authConfig() {
@@ -56,19 +58,20 @@ export class RegisterUseCase {
             verificationToken = randomUUID();
             const tokenHash = await this.hashService.hash(verificationToken);
 
-            verification = EmailVerification.create({
-                id: randomUUID(),
-                userId: user.id,
+            verification = user.createEmailVerification({
+                verificationId: randomUUID(),
                 tokenHash,
                 expiresAt: addTime('1h'),
             });
         }
 
-        await this.userRepository.save(user);
+        await this.transaction.run(async () => {
+            await this.userRepository.save(user);
 
-        if (verification) {
-            await this.emailVerificationRepository.save(verification);
-        }
+            if (verification) {
+                await this.emailVerificationRepository.save(verification);
+            }
+        });
 
         if (verification && verificationToken) {
             await this.verificationEmailService.send(

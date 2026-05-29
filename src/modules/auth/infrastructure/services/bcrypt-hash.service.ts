@@ -1,6 +1,7 @@
 import * as bcrypt from 'bcryptjs';
+import { HashService } from '@modules/auth/application/contracts/hash-service.contract';
 
-export class HashService {
+export class BcryptHashService extends HashService {
     async hash(value: string): Promise<string> {
         return bcrypt.hash(value, 10);
     }

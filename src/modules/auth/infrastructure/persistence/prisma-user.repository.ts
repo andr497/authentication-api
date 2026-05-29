@@ -15,7 +15,7 @@ export class PrismaUserRepository extends UserRepository {
     }
 
     async save(user: User): Promise<User> {
-        const savedUser: PrismaUser = await this.prisma.user.create({
+        const savedUser: PrismaUser = await this.prisma.client.user.create({
             data: UserMapper.toPersistence(user),
         });
 
@@ -23,7 +23,7 @@ export class PrismaUserRepository extends UserRepository {
     }
 
     async update(user: User): Promise<User> {
-        const updatedUser: PrismaUser = await this.prisma.user.update({
+        const updatedUser: PrismaUser = await this.prisma.client.user.update({
             where: {
                 id: user.id,
             },
@@ -36,7 +36,7 @@ export class PrismaUserRepository extends UserRepository {
         id: string,
         options?: RepositoryOptions,
     ): Promise<User | null> {
-        const user = await this.prisma.user.findFirst({
+        const user = await this.prisma.client.user.findFirst({
             where: PrismaQueryHelper.applyScope<UserWhereInput>(
                 {
                     id,
@@ -56,7 +56,7 @@ export class PrismaUserRepository extends UserRepository {
         email: string,
         options?: RepositoryOptions,
     ): Promise<User | null> {
-        const user = await this.prisma.user.findFirst({
+        const user = await this.prisma.client.user.findFirst({
             where: PrismaQueryHelper.applyScope<UserWhereInput>(
                 {
                     email,

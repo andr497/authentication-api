@@ -3,13 +3,17 @@ import { User } from '@modules/auth/domain/entities/user.entity';
 import { Email } from '@modules/auth/domain/value-objects/email.vo';
 
 export class UserMapper {
-    static toDomain(data: PrismaUser): User {
+    static toDomain(user: PrismaUser): User {
         return User.restore({
-            id: data.id,
-            email: Email.create(data.email),
-            password: data.password,
-            isVerified: data.isVerified,
-            isActive: data.isActive,
+            id: user.id,
+            email: Email.create(user.email),
+            password: user.password,
+            isVerified: user.isVerified,
+            isActive: user.isActive,
+
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt,
+            deletedAt: user.deletedAt,
         });
     }
 
@@ -20,6 +24,10 @@ export class UserMapper {
             password: user.getPassword(),
             isVerified: user.isVerified,
             isActive: user.isActive,
+
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt,
+            deletedAt: user.deletedAt,
         };
     }
 }

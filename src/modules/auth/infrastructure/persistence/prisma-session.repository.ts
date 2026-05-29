@@ -11,7 +11,7 @@ export class PrismaSessionRepository extends SessionRepository {
     }
 
     async save(session: Session): Promise<Session> {
-        const created = await this.prisma.session.create({
+        const created = await this.prisma.client.session.create({
             data: SessionMapper.toPersistence(session),
         });
 
@@ -19,7 +19,7 @@ export class PrismaSessionRepository extends SessionRepository {
     }
 
     async findById(id: string): Promise<Session | null> {
-        const session = await this.prisma.session.findFirst({
+        const session = await this.prisma.client.session.findFirst({
             where: { id, revokedAt: null, expiresAt: { gt: new Date() } },
         });
 
@@ -29,7 +29,7 @@ export class PrismaSessionRepository extends SessionRepository {
     }
 
     async revoke(id: string): Promise<void> {
-        await this.prisma.session.update({
+        await this.prisma.client.session.update({
             where: { id },
 
             data: {
@@ -39,7 +39,7 @@ export class PrismaSessionRepository extends SessionRepository {
     }
 
     async revokeAllByUserId(userId: string): Promise<void> {
-        await this.prisma.session.updateMany({
+        await this.prisma.client.session.updateMany({
             where: {
                 userId,
                 revokedAt: null,

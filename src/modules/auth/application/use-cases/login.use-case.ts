@@ -6,14 +6,14 @@ import { addTime } from '@shared/utils/date/add-time';
 import { createAuthConfig } from '@config/auth.config';
 import { Session } from '@modules/auth/domain/entities/session.entity';
 import { AuthErrors } from '@modules/auth/domain/errors/auth-error.factory';
-import { HashService } from '@modules/auth/infrastructure/services/hash.service';
 import { UserRepository } from '@modules/auth/domain/repositories/user.repository';
 import { SessionRepository } from '@modules/auth/domain/repositories/session.repository';
-import { AccessTokenService } from '@modules/auth/application/contracts/access-token-service.contract';
-import { RefreshTokenService } from '@modules/auth/application/contracts/refresh-token-service.contract';
 
 import { LoginDto } from '../dto/login.dto';
 import { RequestMetadataDto } from '../dto/request-metadata.dto';
+import { HashService } from '../contracts/hash-service.contract';
+import { AccessTokenService } from '../contracts/access-token-service.contract';
+import { RefreshTokenService } from '../contracts/refresh-token-service.contract';
 
 @Injectable()
 export class LoginUseCase {
@@ -64,9 +64,8 @@ export class LoginUseCase {
 
         const refreshTokenHash = await this.hashService.hash(refreshToken);
 
-        const session = Session.create({
-            id: sessionId,
-            userId: user.id,
+        const session = user.createSession({
+            sessionId: sessionId,
             refreshTokenHash,
 
             userAgent: metadata.userAgent,

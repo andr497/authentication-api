@@ -1,4 +1,4 @@
-export class EmailVerification {
+export class PasswordReset {
     private constructor(
         public readonly id: string,
         public readonly userId: string,
@@ -14,17 +14,14 @@ export class EmailVerification {
         userId: string;
         tokenHash: string;
         expiresAt: Date;
-    }): EmailVerification {
-        const now = new Date();
-
-        return new EmailVerification(
+    }): PasswordReset {
+        return new PasswordReset(
             params.id,
             params.userId,
             params.tokenHash,
             params.expiresAt,
             null,
-
-            now,
+            new Date(),
         );
     }
 
@@ -34,16 +31,14 @@ export class EmailVerification {
         tokenHash: string;
         expiresAt: Date;
         usedAt?: Date | null;
-
         createdAt: Date;
-    }): EmailVerification {
-        return new EmailVerification(
+    }): PasswordReset {
+        return new PasswordReset(
             params.id,
             params.userId,
             params.tokenHash,
             params.expiresAt,
             params.usedAt ?? null,
-
             params.createdAt,
         );
     }

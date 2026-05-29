@@ -5,14 +5,14 @@ import { EnvService } from '@config/env.service';
 import { addTime } from '@shared/utils/date/add-time';
 import { createAuthConfig } from '@config/auth.config';
 import { Session } from '@modules/auth/domain/entities/session.entity';
-import { HashService } from '@modules/auth/infrastructure/services/hash.service';
 import { SessionRepository } from '@modules/auth/domain/repositories/session.repository';
-import { AccessTokenService } from '@modules/auth/application/contracts/access-token-service.contract';
-import { RefreshTokenService } from '@modules/auth/application/contracts/refresh-token-service.contract';
 
 import { RefreshTokenDto } from '../dto/refresh-token.dto';
 import { RequestMetadataDto } from '../dto/request-metadata.dto';
+import { HashService } from '../contracts/hash-service.contract';
 import { AuthErrors } from '../../domain/errors/auth-error.factory';
+import { AccessTokenService } from '../contracts/access-token-service.contract';
+import { RefreshTokenService } from '../contracts/refresh-token-service.contract';
 
 @Injectable()
 export class RefreshTokenUseCase {
