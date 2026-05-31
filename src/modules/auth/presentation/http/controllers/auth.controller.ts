@@ -1,5 +1,3 @@
-import { LoginDto } from '@src/modules/auth/application/dto/login.dto';
-import { RegisterDto } from '@modules/auth/application/dto/register.dto';
 import {
     Body,
     Controller,
@@ -12,12 +10,6 @@ import {
     Query,
     UseGuards,
 } from '@nestjs/common';
-import { LoginUseCase } from '@src/modules/auth/application/use-cases/login.use-case';
-import { RefreshTokenDto } from '@src/modules/auth/application/dto/refresh-token.dto';
-import { JwtAuthGuard } from '@src/modules/auth/infrastructure/guards/jwt-auth.guard';
-import { RegisterUseCase } from '@modules/auth/application/use-cases/register.use-case';
-import { LogoutUseCase } from '@src/modules/auth/application/use-cases/logout.use-case';
-import { RefreshTokenUseCase } from '@src/modules/auth/application/use-cases/refresh-token.use-case';
 import {
     ApiBadRequestResponse,
     ApiBearerAuth,
@@ -28,13 +20,21 @@ import {
     ApiTags,
     ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
+import { LoginDto } from '@modules/auth/application/dto/login.dto';
+import { RefreshTokenDto } from '@modules/auth/application/dto/refresh-token.dto';
+import { RegisterDto } from '@modules/auth/application/dto/register.dto';
+import { VerifyEmailDto } from '@modules/auth/application/dto/verify-email.dto';
+import { LoginUseCase } from '@modules/auth/application/use-cases/login.use-case';
+import { LogoutUseCase } from '@modules/auth/application/use-cases/logout.use-case';
+import { RefreshTokenUseCase } from '@modules/auth/application/use-cases/refresh-token.use-case';
+import { RegisterUseCase } from '@modules/auth/application/use-cases/register.use-case';
+import { VerifyEmailUseCase } from '@modules/auth/application/use-cases/verify-email.use-case';
+import { JwtAuthGuard } from '@modules/auth/infrastructure/guards/jwt-auth.guard';
 
 import type { AuthUser } from '../types/auth-user.type';
 import { RegisterResponse } from '../responses/register.response';
 import { CurrentUser } from '../decorators/current-user.decorator';
 import { AuthResponseMapper } from '../mappers/auth-response.mapper';
-import { VerifyEmailUseCase } from '@src/modules/auth/application/use-cases/verify-email.use-case';
-import { VerifyEmailDto } from '@src/modules/auth/application/dto/verify-email.dto';
 
 @Controller('auth')
 @ApiTags('Authentication')

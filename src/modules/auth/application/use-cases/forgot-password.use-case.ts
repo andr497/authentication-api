@@ -1,9 +1,8 @@
 import { randomUUID } from 'crypto';
 
 import { Injectable } from '@nestjs/common';
-import { addTime } from '@src/shared/utils/date/add-time';
+import { addTime } from '@shared/utils/date/add-time';
 import { UserRepository } from '@modules/auth/domain/repositories/user.repository';
-import { PasswordReset } from '@modules/auth/domain/entities/password-reset.entity';
 import { PasswordResetRepository } from '@modules/auth/domain/repositories/password-reset.repository';
 
 import { HashService } from '../contracts/hash-service.contract';
@@ -22,14 +21,11 @@ export class ForgotPasswordUseCase {
         if (!user) return;
 
         const token = randomUUID();
-
         const tokenHash = await this.hashService.hash(token);
 
-        const reset = PasswordReset.create({
-            id: randomUUID(),
-            userId: user.id,
+        const reset = user.createPasswordReset({
+            resetId: randomUUID(),
             tokenHash,
-
             expiresAt: addTime('1h'),
         });
 

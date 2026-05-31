@@ -14,4 +14,16 @@ export class Password {
     getValue(): string {
         return this.value;
     }
+
+    equals(other: Password): boolean {
+        if (other === null || other === undefined) {
+            return false;
+        }
+
+        if (!(other instanceof Password)) {
+            return false;
+        }
+
+        return this.value === other.getValue();
+    }
 }

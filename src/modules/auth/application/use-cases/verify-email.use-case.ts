@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { AuthErrors } from '@modules/auth/domain/errors/auth-error.factory';
-import { UserRepository } from '@modules/auth/domain/repositories/user.repository';
-import { TransactionManager } from '@src/shared/application/contracts/transaction-manager.contract';
 import { EmailVerificationRepository } from '@modules/auth/domain/repositories/email-verification.repository';
+import { UserRepository } from '@modules/auth/domain/repositories/user.repository';
+import { TransactionManager } from '@shared/application/contracts/transaction-manager.contract';
 
 import { VerifyEmailDto } from '../dto/verify-email.dto';
 import { HashService } from '../contracts/hash-service.contract';

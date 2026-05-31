@@ -14,6 +14,7 @@ import { RequestMetadataDto } from '../dto/request-metadata.dto';
 import { HashService } from '../contracts/hash-service.contract';
 import { AccessTokenService } from '../contracts/access-token-service.contract';
 import { RefreshTokenService } from '../contracts/refresh-token-service.contract';
+import { EventBus } from '@shared/application/contracts/event-bus.contract';
 
 @Injectable()
 export class LoginUseCase {
@@ -24,6 +25,7 @@ export class LoginUseCase {
         private readonly accessTokenService: AccessTokenService,
         private readonly refreshTokenService: RefreshTokenService,
         private readonly env: EnvService,
+        private readonly eventBus: EventBus,
     ) {}
 
     private get authConfig() {
@@ -39,18 +41,21 @@ export class LoginUseCase {
 
         const isValidPassword = await this.hashService.compare(
             dto.password,
-            user.getPassword(),
+            user.getPassword().getValue(),
         );
 
         if (!isValidPassword) {
             throw AuthErrors.invalidCredentials();
         }
 
-        if (!user.isActive) {
+        if (!user.isActiveUser()) {
             throw AuthErrors.accountDisabled();
         }
 
-        if (this.authConfig.emailVerificationEnabled && !user.isVerified) {
+        if (
+            this.authConfig.emailVerificationEnabled &&
+            !user.isEmailVerified()
+        ) {
             throw AuthErrors.emailNotVerified();
         }
 
@@ -75,6 +80,7 @@ export class LoginUseCase {
         });
 
         await this.sessionRepository.save(session);
+        await this.eventBus.publish(user.pullDomainEvents());
 
         const accessToken = await this.accessTokenService.generate(payload);
 

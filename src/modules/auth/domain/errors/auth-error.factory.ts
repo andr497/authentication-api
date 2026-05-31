@@ -24,7 +24,7 @@ export class AuthErrors {
         return new AuthError(AuthErrorCode.ACCOUNT_DISABLED, 401, message);
     }
 
-    static emailNotVerified(message: string = 'Account disabled') {
+    static emailNotVerified(message: string = 'Email not verified') {
         return new AuthError(AuthErrorCode.EMAIL_NOT_VERIFIED, 401, message);
     }
 

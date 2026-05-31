@@ -1,13 +1,15 @@
-export abstract class AggregateRoot {
-    private readonly domainEvent: unknown[] = [];
+import { DomainEvent } from '../events/domain-event';
 
-    addDomainEvent(event: unknown): void {
-        this.domainEvent.push(event);
+export abstract class AggregateRoot {
+    private readonly domainEvents: DomainEvent[] = [];
+
+    addDomainEvent(event: DomainEvent): void {
+        this.domainEvents.push(event);
     }
 
-    pullDomainEvents(): unknown[] {
-        const events = [...this.domainEvent];
-        this.domainEvent.length = 0;
+    pullDomainEvents(): DomainEvent[] {
+        const events = [...this.domainEvents];
+        this.domainEvents.length = 0;
         return events;
     }
 }

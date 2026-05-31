@@ -9,6 +9,8 @@ export class PasswordResetMapper {
             tokenHash: passwordReset.tokenHash,
             expiresAt: passwordReset.expiresAt,
             usedAt: passwordReset.usedAt,
+
+            createdAt: passwordReset.createdAt,
         });
     }
 
@@ -19,6 +21,8 @@ export class PasswordResetMapper {
             tokenHash: passwordReset.tokenHash,
             expiresAt: passwordReset.expiresAt,
             usedAt: passwordReset.usedAt,
+
+            createdAt: passwordReset.createdAt,
         };
     }
 }

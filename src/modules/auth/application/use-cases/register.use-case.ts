@@ -8,14 +8,16 @@ import { User } from '@modules/auth/domain/entities/user.entity';
 import { Email } from '@modules/auth/domain/value-objects/email.vo';
 import { Password } from '@modules/auth/domain/value-objects/password.vo';
 import { AuthErrors } from '@modules/auth/domain/errors/auth-error.factory';
+import { EventBus } from '@shared/application/contracts/event-bus.contract';
+import { UserRegisteredEvent } from '@modules/auth/domain/events/user-registered.event';
 import { UserRepository } from '@modules/auth/domain/repositories/user.repository';
-import { EmailVerification } from '@modules/auth/domain/entities/email-verification.entity';
+import { HashedPassword } from '@modules/auth/domain/value-objects/hashed-password.vo';
+import { TransactionManager } from '@shared/application/contracts/transaction-manager.contract';
 import { EmailVerificationRepository } from '@modules/auth/domain/repositories/email-verification.repository';
 
 import { RegisterDto } from '../dto/register.dto';
 import { HashService } from '../contracts/hash-service.contract';
-import { VerificationEmailService } from './../services/verification-email.service';
-import { TransactionManager } from '@src/shared/application/contracts/transaction-manager.contract';
+import { VerificationEmailService } from '../services/verification-email.service';
 
 @Injectable()
 export class RegisterUseCase {
@@ -25,6 +27,7 @@ export class RegisterUseCase {
         private readonly verificationEmailService: VerificationEmailService,
         private readonly hashService: HashService,
         private readonly env: EnvService,
+        private readonly eventBus: EventBus,
         private readonly transaction: TransactionManager,
     ) {}
 
@@ -43,42 +46,48 @@ export class RegisterUseCase {
         if (existingUser) {
             throw AuthErrors.userAlreadyExists();
         }
+
         const hashedPassword = await this.hashService.hash(password.getValue());
 
         const user = User.create({
             id: randomUUID(),
             email,
-            password: hashedPassword,
+            password: HashedPassword.create(hashedPassword),
         });
 
-        let verification: EmailVerification | null = null;
-        let verificationToken: string | null = null;
-
         if (this.authConfig.emailVerificationEnabled) {
-            verificationToken = randomUUID();
+            const verificationToken = randomUUID();
             const tokenHash = await this.hashService.hash(verificationToken);
 
-            verification = user.createEmailVerification({
+            const verification = user.createEmailVerification({
                 verificationId: randomUUID(),
                 tokenHash,
                 expiresAt: addTime('1h'),
             });
-        }
 
-        await this.transaction.run(async () => {
-            await this.userRepository.save(user);
-
-            if (verification) {
-                await this.emailVerificationRepository.save(verification);
-            }
-        });
-
-        if (verification && verificationToken) {
-            await this.verificationEmailService.send(
-                user.email.getValue(),
-                verificationToken,
-                user.id,
+            user.pullDomainEvents();
+            user.addDomainEvent(
+                new UserRegisteredEvent(
+                    user.id,
+                    user.email.getValue(),
+                    verificationToken,
+                ),
             );
+
+            await this.transaction.run(async () => {
+                await this.userRepository.save(user);
+                await this.emailVerificationRepository.save(verification);
+            });
+
+            await this.eventBus.publish(user.pullDomainEvents());
+        } else {
+            user.verifyEmail();
+
+            await this.transaction.run(async () => {
+                await this.userRepository.save(user);
+            });
+
+            await this.eventBus.publish(user.pullDomainEvents());
         }
 
         return user;

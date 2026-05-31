@@ -6,7 +6,7 @@ import { UserMapper } from '@modules/auth/infrastructure/mappers/user.mapper';
 import { PrismaService } from '@infrastructure/database/prisma/prisma.service';
 import { RepositoryOptions } from '@shared/domain/types/repository-options.type';
 import { UserRepository } from '@modules/auth/domain/repositories/user.repository';
-import { PrismaQueryHelper } from '@src/infrastructure/database/prisma/helpers/prisma-query.helper';
+import { PrismaQueryHelper } from '@infrastructure/database/prisma/helpers/prisma-query.helper';
 
 @Injectable()
 export class PrismaUserRepository extends UserRepository {

@@ -18,4 +18,16 @@ export class Email {
     getValue(): string {
         return this.value;
     }
+
+    equals(other: Email): boolean {
+        if (other === null || other === undefined) {
+            return false;
+        }
+
+        if (!(other instanceof Email)) {
+            return false;
+        }
+
+        return this.value === other.getValue();
+    }
 }

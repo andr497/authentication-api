@@ -7,8 +7,8 @@ export class AuthResponseMapper {
         return {
             id: user.id,
             email: user.email.getValue(),
-            isVerified: user.isVerified,
-            isActive: user.isActive,
+            isVerified: user.isEmailVerified(),
+            isActive: user.isActiveUser(),
         };
     }
 

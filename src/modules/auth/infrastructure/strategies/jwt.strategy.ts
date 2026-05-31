@@ -1,26 +1,26 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
-import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { AuthUser } from '@modules/auth/presentation/http/types/auth-user.type';
 import { UserRepository } from '@modules/auth/domain/repositories/user.repository';
 import { SessionRepository } from '@modules/auth/domain/repositories/session.repository';
 import { AccessTokenPayload } from '@modules/auth/application/types/access-token-payload.type';
+import { EnvService } from '@config/env.service';
+import { createAuthConfig } from '@config/auth.config';
+import { AuthErrors } from '@modules/auth/domain/errors/auth-error.factory';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
     constructor(
-        configService: ConfigService,
+        env: EnvService,
         private readonly userRepository: UserRepository,
         private readonly sessionRepository: SessionRepository,
     ) {
         super({
             jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
             ignoreExpiration: false,
-            secretOrKey: configService.get<string>(
-                'JWT_ACCESS_SECRET',
-            ) as string,
+            secretOrKey: createAuthConfig(env).accessTokenSecret,
         });
     }
 
@@ -28,26 +28,26 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         const user = await this.userRepository.findById(payload.sub);
 
         if (!user) {
-            throw new UnauthorizedException('UNAUTHORIZED_USER_NOT_FOUND');
+            throw AuthErrors.invalidCredentials('User not found');
         }
 
-        if (!user.isActive) {
-            throw new UnauthorizedException('UNAUTHORIZED_USER_INACTIVE');
+        if (!user.isActiveUser()) {
+            throw AuthErrors.accountDisabled();
         }
         const session = await this.sessionRepository.findById(
             payload.sessionId,
         );
 
         if (!session) {
-            throw new UnauthorizedException('UNAUTHORIZED_SESSION_NOT_FOUND');
+            throw AuthErrors.invalidCredentials('Session not found');
         }
 
-        if (session.revokedAt) {
-            throw new UnauthorizedException('UNAUTHORIZED_SESSION_REVOKED');
+        if (session.isRevoked()) {
+            throw AuthErrors.invalidCredentials('Session revoked');
         }
 
-        if (session.expiresAt.getTime() < Date.now()) {
-            throw new UnauthorizedException('UNAUTHORIZED_SESSION_EXPIRED');
+        if (session.isExpired()) {
+            throw AuthErrors.invalidCredentials('Session expired');
         }
 
         return payload;

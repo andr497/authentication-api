@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EnvService } from '@config/env.service';
 import { createAppConfig } from '@config/app.config';
-import { LoggerService } from '@shared/infrastructure/logging/services/logger.service';
+import { LogService } from '@shared/infrastructure/logging/contracts/log-service.contract';
 import { ExceptionReporter } from '@shared/infrastructure/exceptions/contracts/exception-reporter.contract';
 
 import { EmailService } from '../contracts/email-service.contract';
@@ -11,7 +11,7 @@ export class VerificationEmailService {
     constructor(
         private readonly emailService: EmailService,
         private readonly reporter: ExceptionReporter,
-        private readonly logger: LoggerService,
+        private readonly logger: LogService,
         private readonly env: EnvService,
     ) {}
 

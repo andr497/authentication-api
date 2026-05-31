@@ -74,4 +74,12 @@ export class Session {
     getRefreshTokenHash(): string {
         return this.refreshTokenHash;
     }
+
+    isExpired(): boolean {
+        return this.expiresAt < new Date();
+    }
+
+    isRevoked(): boolean {
+        return this.revokedAt !== null;
+    }
 }

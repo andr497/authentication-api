@@ -2,16 +2,20 @@ import { AggregateRoot } from '@shared/domain/entities/aggregate-root';
 
 import { Session } from './session.entity';
 import { Email } from '../value-objects/email.vo';
-import { EmailVerification } from './email-verification.entity';
 import { PasswordReset } from './password-reset.entity';
+import { EmailVerification } from './email-verification.entity';
+import { EmailVerifiedEvent } from '../events/email-verified.event';
+import { HashedPassword } from '../value-objects/hashed-password.vo';
+import { UserRegisteredEvent } from '../events/user-registered.event';
+import { PasswordChangedEvent } from '../events/password-changed.event';
 
 export class User extends AggregateRoot {
     constructor(
         public readonly id: string,
         public readonly email: Email,
-        private password: string,
-        public isVerified: boolean,
-        public isActive: boolean,
+        private password: HashedPassword,
+        private isVerified: boolean,
+        private isActive: boolean,
 
         public readonly createdAt: Date,
         public updatedAt: Date,
@@ -23,10 +27,10 @@ export class User extends AggregateRoot {
     static create(params: {
         id: string;
         email: Email;
-        password: string;
+        password: HashedPassword;
     }): User {
         const now = new Date();
-        return new User(
+        const user = new User(
             params.id,
             params.email,
             params.password,
@@ -37,12 +41,18 @@ export class User extends AggregateRoot {
             now,
             null,
         );
+
+        user.addDomainEvent(
+            new UserRegisteredEvent(user.id, user.email.getValue()),
+        );
+
+        return user;
     }
 
     static restore(params: {
         id: string;
         email: Email;
-        password: string;
+        password: HashedPassword;
         isVerified: boolean;
         isActive: boolean;
 
@@ -90,16 +100,17 @@ export class User extends AggregateRoot {
         ipAddress?: string | null;
 
         expiresAt: Date;
-    }): Session {
+    }): { revokedSession: Session; newSession: Session } {
         params.currentSession.revoke();
-
-        return this.createSession({
+        const newSession = this.createSession({
             sessionId: params.newSessionId,
             refreshTokenHash: params.refreshTokenHash,
             userAgent: params.userAgent,
             ipAddress: params.ipAddress,
             expiresAt: params.expiresAt,
         });
+
+        return { revokedSession: params.currentSession, newSession };
     }
 
     createEmailVerification(params: {
@@ -134,11 +145,14 @@ export class User extends AggregateRoot {
         }
         this.isVerified = true;
         this.touch();
+        this.addDomainEvent(new EmailVerifiedEvent(this.id));
     }
 
-    changePassword(newPassword: string) {
+    changePassword(newPassword: HashedPassword) {
         this.password = newPassword;
         this.touch();
+
+        this.addDomainEvent(new PasswordChangedEvent(this.id));
     }
 
     delete(): void {
@@ -162,7 +176,11 @@ export class User extends AggregateRoot {
         return this.isVerified;
     }
 
-    getPassword(): string {
+    isActiveUser(): boolean {
+        return this.isActive;
+    }
+
+    getPassword(): HashedPassword {
         return this.password;
     }
 }

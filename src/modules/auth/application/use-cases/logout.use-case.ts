@@ -8,8 +8,8 @@ import { RefreshTokenService } from '../contracts/refresh-token-service.contract
 @Injectable()
 export class LogoutUseCase {
     constructor(
-        private sessionRepository: SessionRepository,
-        private hashService: HashService,
+        private readonly sessionRepository: SessionRepository,
+        private readonly hashService: HashService,
         private readonly refreshTokenService: RefreshTokenService,
     ) {}
 

@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { Session } from '@modules/auth/domain/entities/session.entity';
-import { PrismaService } from '@src/infrastructure/database/prisma/prisma.service';
+import { PrismaService } from '@infrastructure/database/prisma/prisma.service';
 import { SessionRepository } from '@modules/auth/domain/repositories/session.repository';
+
 import { SessionMapper } from '../mappers/session.mapper';
 
 @Injectable()
@@ -19,8 +20,8 @@ export class PrismaSessionRepository extends SessionRepository {
     }
 
     async findById(id: string): Promise<Session | null> {
-        const session = await this.prisma.client.session.findFirst({
-            where: { id, revokedAt: null, expiresAt: { gt: new Date() } },
+        const session = await this.prisma.client.session.findUnique({
+            where: { id },
         });
 
         if (!session) return null;

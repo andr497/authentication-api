@@ -3,8 +3,6 @@ import { HashService } from '@modules/auth/application/contracts/hash-service.co
 import { EmailService } from '@modules/auth/application/contracts/email-service.contract';
 import { AccessTokenService } from '@modules/auth/application/contracts/access-token-service.contract';
 import { RefreshTokenService } from '@modules/auth/application/contracts/refresh-token-service.contract';
-import { ExceptionReporter } from '@shared/infrastructure/exceptions/contracts/exception-reporter.contract';
-import { FileExceptionReporter } from '@shared/infrastructure/exceptions/service/file-exception-reporter.service';
 
 import { BcryptHashService } from '../services/bcrypt-hash.service';
 import { JwtAccessTokenService } from '../services/jwt-access-token.service';
@@ -27,9 +25,5 @@ export const servicesProviders: Provider[] = [
     {
         provide: EmailService,
         useClass: NodemailerEmailService,
-    },
-    {
-        provide: ExceptionReporter,
-        useClass: FileExceptionReporter,
     },
 ];

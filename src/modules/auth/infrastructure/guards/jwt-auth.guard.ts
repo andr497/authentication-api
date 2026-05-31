@@ -1,10 +1,6 @@
-import {
-    ExecutionContext,
-    Injectable,
-    UnauthorizedException,
-} from '@nestjs/common';
+import { ExecutionContext, Injectable } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { AuthErrors } from '../../domain/errors/auth-error.factory';
+import { AuthErrors } from '@modules/auth/domain/errors/auth-error.factory';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
@@ -34,7 +30,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
                         );
                 }
 
-                throw new UnauthorizedException(info.message);
+                throw AuthErrors.invalidCredentials(info.message);
             }
         }
 

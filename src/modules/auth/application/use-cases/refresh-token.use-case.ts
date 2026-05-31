@@ -4,21 +4,22 @@ import { Injectable } from '@nestjs/common';
 import { EnvService } from '@config/env.service';
 import { addTime } from '@shared/utils/date/add-time';
 import { createAuthConfig } from '@config/auth.config';
-import { Session } from '@modules/auth/domain/entities/session.entity';
+import { AuthErrors } from '@modules/auth/domain/errors/auth-error.factory';
+import { UserRepository } from '@modules/auth/domain/repositories/user.repository';
 import { SessionRepository } from '@modules/auth/domain/repositories/session.repository';
 
 import { RefreshTokenDto } from '../dto/refresh-token.dto';
 import { RequestMetadataDto } from '../dto/request-metadata.dto';
 import { HashService } from '../contracts/hash-service.contract';
-import { AuthErrors } from '../../domain/errors/auth-error.factory';
 import { AccessTokenService } from '../contracts/access-token-service.contract';
 import { RefreshTokenService } from '../contracts/refresh-token-service.contract';
 
 @Injectable()
 export class RefreshTokenUseCase {
     constructor(
+        private readonly userRepository: UserRepository,
         private readonly sessionRepository: SessionRepository,
-        private hashService: HashService,
+        private readonly hashService: HashService,
         private readonly accessTokenService: AccessTokenService,
         private readonly refreshTokenService: RefreshTokenService,
         private readonly env: EnvService,
@@ -39,11 +40,11 @@ export class RefreshTokenUseCase {
             throw AuthErrors.invalidCredentials();
         }
 
-        if (currentSession.revokedAt) {
+        if (currentSession.isRevoked()) {
             throw AuthErrors.invalidCredentials();
         }
 
-        if (currentSession.expiresAt < new Date()) {
+        if (currentSession.isExpired()) {
             throw AuthErrors.invalidCredentials();
         }
 
@@ -56,8 +57,6 @@ export class RefreshTokenUseCase {
             throw AuthErrors.invalidCredentials();
         }
 
-        await this.sessionRepository.revoke(currentSession.id);
-
         const newSessionId = randomUUID();
 
         const newPayload = {
@@ -69,9 +68,15 @@ export class RefreshTokenUseCase {
 
         const refreshTokenHash = await this.hashService.hash(refreshToken);
 
-        const newSession = Session.create({
-            id: newSessionId,
-            userId: payload.sub,
+        const user = await this.userRepository.findById(payload.sub);
+
+        if (!user) {
+            throw AuthErrors.invalidCredentials('User do not exist');
+        }
+
+        const { revokedSession, newSession } = user.rotateSession({
+            currentSession,
+            newSessionId,
             refreshTokenHash,
 
             ipAddress: metadata.ipAddress,
@@ -80,6 +85,7 @@ export class RefreshTokenUseCase {
             expiresAt: addTime(this.authConfig.refreshTokenExpiresIn),
         });
 
+        await this.sessionRepository.revoke(revokedSession.id);
         await this.sessionRepository.save(newSession);
 
         const accessToken = await this.accessTokenService.generate(newPayload);
